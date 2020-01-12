@@ -11,12 +11,10 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "Gemfile.lock" }}
             - v1-dependencies-
-
       - run:
           name: install dependencies
           command: |
             bundle install --jobs=4 --retry=3 --path vendor/bundle
-
       - save_cache:
           paths:
             - ./vendor/bundle
@@ -32,6 +30,10 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "Gemfile.lock" }}
             - v1-dependencies-
+      - run:
+        name: install dependencies
+        command: |
+          bundle install --jobs=4 --retry=3 --path vendor/bundle
       - run: bundle exec rubycritic
       - store_artifacts:
           path: ./tmp/rubycritic
@@ -46,12 +48,12 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "Gemfile.lock" }}
             - v1-dependencies-
-
-      # Database setup
+      - run:
+        name: install dependencies
+        command: |
+          bundle install --jobs=4 --retry=3 --path vendor/bundle
       - run: bundle exec rake db:create
       - run: bundle exec rake db:schema:load
-
-      # run tests!
       - run:
           name: run tests
           command: |
@@ -65,8 +67,6 @@ jobs:
               --out /tmp/test-results/rspec.xml \
               --format progress \
               $TEST_FILES
-
-      # collect reports
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:

@@ -34,7 +34,7 @@ jobs:
             - v1-dependencies-
       - run: bundle exec rubycritic
       - store_artifacts:
-        path: ./tmp/rubycritic
+          path: ./tmp/rubycritic
 
   test:
     docker:
@@ -78,5 +78,9 @@ workflows:
   development:
     jobs:
       - setup
-      - rubycritic
-      - test
+      - rubycritic:
+          requires:
+            - setup
+      - test:
+          requires:
+            - setup

@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  setup:
+  setup-dependencies:
     docker:
       - image: circleci/ruby:2.7.0-node-browsers
     working_directory: ~/repo
@@ -9,13 +9,25 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Gemfile.lock" }}
-            - v1-dependencies-
+            - ruby-gems-{{ checksum "Gemfile.lock" }}
       - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
       - save_cache:
           paths:
             - ./vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+          key: ruby-gems-{{ checksum "Gemfile.lock" }}
+
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: yarn install --frozen-lockfile
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
 
   rubycritic:
     docker:
@@ -25,10 +37,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Gemfile.lock" }}
-            - v1-dependencies-
+            - ruby-gems-{{ checksum "Gemfile.lock" }}
       - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
-      - run: bundle exec rubycritic
+      - run: bundle exec rubycritic ./app
       - store_artifacts:
           path: ./tmp/rubycritic
 
@@ -40,8 +51,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Gemfile.lock" }}
-            - v1-dependencies-
+            - ruby-gems-{{ checksum "Gemfile.lock" }}
+            - yarn-packages-{{ checksum "yarn.lock" }}
       - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
       - run: bundle exec rake db:create
       - run: bundle exec rake db:schema:load
@@ -68,10 +79,10 @@ workflows:
   version: 2
   development:
     jobs:
-      - setup
+      - setup-dependencies
       - rubycritic:
           requires:
-            - setup
+            - setup-dependencies
       - test:
           requires:
-            - setup
+            - setup-dependencies

@@ -38,7 +38,11 @@ jobs:
       - restore_cache:
           keys:
             - ruby-gems-{{ checksum "Gemfile.lock" }}
+      - restore_cache:
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
       - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: yarn install
       - run: bundle exec rubycritic ./app
       - store_artifacts:
           path: ./tmp/rubycritic
@@ -52,8 +56,11 @@ jobs:
       - restore_cache:
           keys:
             - ruby-gems-{{ checksum "Gemfile.lock" }}
+      - restore_cache:
+          keys:
             - yarn-packages-{{ checksum "yarn.lock" }}
       - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - run: yarn install
       - run: bundle exec rake db:create
       - run: bundle exec rake db:schema:load
       - run:

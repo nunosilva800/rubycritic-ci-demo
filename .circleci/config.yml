@@ -44,6 +44,14 @@ jobs:
       - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
       - run: yarn install
       - run: bundle exec rubycritic ./app
+
+      - type: shell
+        command: |
+          bundle exec rubycritic ./app -f json lib -f html --no-browser
+      - run:
+        name: Coverage notification
+        command: bundle exec rake circleci:report_coverage
+
       - store_artifacts:
           path: ./tmp/rubycritic
 

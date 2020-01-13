@@ -3,4 +3,6 @@
 
 require_relative 'config/application'
 
+require 'circleci/coverage_reporter/rake_task' if ENV['CIRCLECI']
+
 Rails.application.load_tasks

@@ -49,8 +49,8 @@ jobs:
         command: |
           bundle exec rubycritic ./app -f json lib -f html --no-browser
       - run:
-        name: Coverage notification
-        command: bundle exec rake circleci:report_coverage
+          name: Coverage notification
+          command: bundle exec rake circleci:report_coverage
 
       - store_artifacts:
           path: ./tmp/rubycritic
